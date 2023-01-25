@@ -14,9 +14,9 @@ export const payment = (req,res) => {
 
     const {product, token} = req.body;
     console.log(`Product: ${product}`);
-    console.log(`Price: ${product.price}`);
+    console.log(`Price: ${product.price*product.quantity}`);
 
-    const idempotencyKey = uuidV4();
+    const idempotencyKey = uuidv4();
     return stripe.customers.create({
         email:token.email,
         source: token.id
@@ -24,7 +24,7 @@ export const payment = (req,res) => {
     .then(customer => {
         stripe.charges.create({
             amount: product.price * 100,
-            currency:'usd',
+            currency:'inr',
             customer: customer.id,
             receipt_email: token.email,
             description:`Purchase of ${product.name}`,
@@ -36,9 +36,9 @@ export const payment = (req,res) => {
             }
 
         },{idempotencyKey})
-        .then(result => res.status(200),json(result))
-        .catch(err => console.log(err))
+        
     })
-    .catch(err => console.log(err))
+    .then(result => res.status(200).json(result))
+        .catch(err => console.log(err))
 
 }
